@@ -49,7 +49,7 @@
 	"chat.agent.maxRequests": 0,
 	"chat.commandCenter.enabled": false,
 	"chat.detectParticipant.enabled": false,
-	"chat.disableAIFeatures": true,
+	"chat.disableAIFeatures": false,
 	"chat.extensionTools.enabled": false,
 	"chat.focusWindowOnConfirmation": false,
 	"chat.implicitContext.enabled": {
@@ -117,10 +117,10 @@
 	"chat.extensionUnification.enabled": false,
 	"githubPullRequests.codingAgent.autoCommitAndPush": false,
 	"githubPullRequests.codingAgent.uiIntegration": false,
-	"chat.useClaudeSkills": false,
 	"chat.useNestedAgentsMdFiles": false,
 	"chat.tools.global.autoApprove": false,
 	"chat.mcp.gallery.enabled": false,
 	"mermaid-chat.enabled": false,
-	"githubPullRequests.experimental.useQuickChat": false
+	"githubPullRequests.experimental.useQuickChat": false,
+	"chat.useAgentSkills": false
 }

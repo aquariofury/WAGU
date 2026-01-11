@@ -1177,6 +1177,9 @@ and you're good to go.
 	if(!gun_user)
 		gun_user = user
 
+	if (user.interaction && user.interaction.is_watching)
+        return NONE   // Prevent firing while looking up/down ladder
+
 	if(!able_to_fire(user) || !target || !get_turf(user) || !get_turf(target))
 		return NONE
 
