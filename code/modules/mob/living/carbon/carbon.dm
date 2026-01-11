@@ -404,7 +404,10 @@
 	else //real item in hand, not a grab
 		thrown_thing = I
 
-
+	// Prevent throwing explosives while cloaked
+	if(thrown_thing && istype(thrown_thing, /obj/item/explosive) && HAS_TRAIT(src, TRAIT_CLOAKED))
+		to_chat(src, SPAN_WARNING("Your cloak prevents you from throwing [thrown_thing]!"))
+		return
 
 	//actually throw it!
 	if(thrown_thing)
