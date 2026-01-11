@@ -1176,9 +1176,12 @@ and you're good to go.
 
 	if(!gun_user)
 		gun_user = user
-
-	if (user.interaction && user.interaction.is_watching)
-        return NONE   // Prevent firing while looking up/down ladder
+// Check if user is watching a ladder
+	if(user.interactee && istype(user.interactee, /obj/structure/ladder))
+		var/obj/structure/ladder/L = user.interactee
+		if(L.is_watching)
+			to_chat(user, SPAN_WARNING("You can't shoot while looking up the ladder!"))
+			return NONE
 
 	if(!able_to_fire(user) || !target || !get_turf(user) || !get_turf(target))
 		return NONE
