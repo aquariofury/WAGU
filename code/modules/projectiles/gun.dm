@@ -1176,7 +1176,7 @@ and you're good to go.
 
 	if(!gun_user)
 		gun_user = user
-// Check if user is watching a ladder
+// Check if watching a ladder
 	if(user.interactee && istype(user.interactee, /obj/structure/ladder))
 		var/obj/structure/ladder/L = user.interactee
 		if(L.is_watching)
