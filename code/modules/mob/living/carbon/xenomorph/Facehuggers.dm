@@ -421,7 +421,7 @@
 
 	if(isturf(loc))
 		var/obj/effect/alien/egg/E = locate() in loc
-		if(E && E.status == EGG_BURST)
+		if(E && E.status == EGG_BURST && !istype(E, /obj/effect/alien/egg/carrier_egg))
 			return_to_egg(E)
 			return
 		var/obj/effect/alien/resin/trap/T = locate() in loc

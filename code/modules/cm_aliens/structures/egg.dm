@@ -262,6 +262,10 @@
 		if(F.stat == DEAD)
 			to_chat(user, SPAN_XENOWARNING("This child is dead."))
 			return
+		// Prevent refilling fragile eggs to avoid infinite egg exploits
+		if(istype(src, /obj/effect/alien/egg/carrier_egg))
+			to_chat(user, SPAN_XENOWARNING("This egg is too fragile to be refilled."))
+			return
 		switch(status)
 			if(EGG_BURST)
 				if(user)
