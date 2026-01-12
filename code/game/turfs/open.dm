@@ -788,7 +788,8 @@
 	if(!fishing_allowed || covered)
 		return ..()
 
-	if(xeno.a_intent != INTENT_HELP || xeno.zone_selected != "groin")
+	// Only fish if help intent AND fishing mode is enabled
+	if(xeno.a_intent != INTENT_HELP || !xeno.fishing_mode_enabled)
 		return ..()
 
 	if(xeno.buckled || xeno.is_mob_incapacitated())

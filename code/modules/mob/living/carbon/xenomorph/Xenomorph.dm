@@ -65,6 +65,7 @@
 	var/haul_timer
 
 	// Tail fishing state
+	var/fishing_mode_enabled = FALSE
 	var/fishing_click_mode = FISHING_CLICK_NONE
 	var/turf/fishing_turf = null
 

@@ -42,6 +42,18 @@
 
 	hive.faction_ui.tgui_interact(src)
 
+/mob/living/carbon/xenomorph/verb/toggle_fishing_mode()
+	set name = "Toggle Tail Fishing"
+	set desc = "Enable or disable tail fishing mode. When enabled, clicking water with help intent will start fishing."
+	set category = "Alien"
+
+	fishing_mode_enabled = !fishing_mode_enabled
+
+	if(fishing_mode_enabled)
+		to_chat(src, SPAN_NOTICE("We ready our tail for fishing. Clicking water with help intent will now start fishing."))
+	else
+		to_chat(src, SPAN_NOTICE("We relax our tail. Fishing mode disabled."))
+
 /mob/living/carbon/xenomorph/verb/clear_built_structures()
 	set name = "Clear Built Structures"
 	set desc = "Clears your current built structures that are tied to you."

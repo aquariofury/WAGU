@@ -69,6 +69,15 @@
 			var/atom_type = pick(guttable_atoms)
 			new atom_type(get_turf(user))
 
+/obj/item/reagent_container/food/snacks/fishable/attack_alien(mob/living/carbon/xenomorph/xeno)
+	if(xeno.a_intent == INTENT_HELP && Adjacent(xeno))
+		xeno.visible_message(SPAN_NOTICE("[xeno] devours \the [src] hungrily."), \
+							SPAN_NOTICE("We devour \the [src]. Fresh prey from the water..."))
+		playsound(xeno, 'sound/items/eatfood.ogg', 25, 1)
+		qdel(src)
+		return XENO_NONCOMBAT_ACTION
+	return ..()
+
 /obj/item/reagent_container/food/snacks/fishable/crab
 	name = "\improper spindle crab"
 	desc = "Looks like a little crab."
