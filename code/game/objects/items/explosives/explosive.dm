@@ -19,6 +19,10 @@
 	var/max_container_volume = 120
 	var/current_container_volume = 0
 	var/assembly_stage = ASSEMBLY_EMPTY //The assembly_stage of the assembly
+	//Grenade module system
+	var/list/obj/item/grenade_module/installed_modules = list()
+	var/list/allowed_modules = list(/obj/item/grenade_module) // Which module types can be installed
+	var/max_modules = 1 // Maximum number of modules that can be installed
 	var/list/reaction_limits = list("max_ex_power" = 180, "base_ex_falloff" = 80, "max_ex_shards" = 40,
 									"max_fire_rad" = 5, "max_fire_int" = 25, "max_fire_dur" = 24,
 									"min_fire_rad" = 1, "min_fire_int" = 3, "min_fire_dur" = 3
@@ -56,6 +60,7 @@
 	creator = null
 	QDEL_NULL(detonator)
 	QDEL_NULL_LIST(containers)
+	QDEL_NULL_LIST(installed_modules)
 	. = ..()
 
 /obj/item/explosive/clicked(mob/user, list/mods)
@@ -83,13 +88,17 @@
 			detonator=null
 			assembly_stage = ASSEMBLY_EMPTY
 			icon_state = base_icon_state
+		else if(length(installed_modules))
+			for(var/obj/item/grenade_module/M in installed_modules)
+				installed_modules -= M
+				user.put_in_hands(M)
 		else if(length(containers))
 			for(var/obj/B in containers)
 				if(istype(B))
 					containers -= B
 					user.put_in_hands(B)
 			current_container_volume = 0
-		desc = initial(desc) + "\n Contains [length(containers)] containers[detonator?" and detonator":""]"
+		desc = initial(desc) + "\n Contains [length(containers)] containers[detonator?" and detonator":""][length(installed_modules)?" and [length(installed_modules)] module(s)":""]"
 		return
 	cause_data = create_cause_data(initial(name), user)
 	return TRUE
@@ -137,7 +146,7 @@
 		det.forceMove(src)
 		detonator = det
 		assembly_stage = ASSEMBLY_UNLOCKED
-		desc = initial(desc) + "\n Contains [length(containers)] containers[detonator?" and detonator":""]"
+		desc = initial(desc) + "\n Contains [length(containers)] containers[detonator?" and detonator":""][length(installed_modules)?" and [length(installed_modules)] module(s)":""]"
 		update_icon()
 	else if(HAS_TRAIT(W, TRAIT_TOOL_SCREWDRIVER))
 		if(assembly_stage == ASSEMBLY_UNLOCKED)
@@ -152,9 +161,24 @@
 		else if(assembly_stage == ASSEMBLY_LOCKED)
 			to_chat(user, SPAN_NOTICE("You unlock the assembly."))
 			playsound(loc, 'sound/items/Screwdriver.ogg', 25, 0, 6)
-			desc = initial(desc) + "\n Contains [length(containers)] containers[detonator?" and detonator":""]"
+			desc = initial(desc) + "\n Contains [length(containers)] containers[detonator?" and detonator":""][length(installed_modules)?" and [length(installed_modules)] module(s)":""]"
 			assembly_stage = ASSEMBLY_UNLOCKED
 		update_icon()
+	else if(istype(W, /obj/item/grenade_module) && (!assembly_stage || assembly_stage == ASSEMBLY_UNLOCKED))
+		var/obj/item/grenade_module/GM = W
+		if(!is_type_in_list(GM, allowed_modules))
+			to_chat(user, SPAN_DANGER("This module is not compatible with [name]."))
+			return
+		if(length(installed_modules) >= max_modules)
+			to_chat(user, SPAN_DANGER("The [name] can not hold more modules."))
+			return
+		if(user.temp_drop_inv_item(GM))
+			to_chat(user, SPAN_NOTICE("You install \the [GM] into the [name]."))
+			playsound(loc, 'sound/items/Screwdriver2.ogg', 25, 0, 6)
+			GM.forceMove(src)
+			installed_modules += GM
+			assembly_stage = ASSEMBLY_UNLOCKED
+			desc = initial(desc) + "\n Contains [length(containers)] containers[detonator?" and detonator":""][length(installed_modules)?" and [length(installed_modules)] module(s)":""]"
 	else if(is_type_in_list(W, allowed_containers) && (!assembly_stage || assembly_stage == ASSEMBLY_UNLOCKED))
 		if(current_container_volume >= max_container_volume)
 			to_chat(user, SPAN_DANGER("The [name] can not hold more containers."))
@@ -170,7 +194,7 @@
 					containers += W
 					current_container_volume += W.reagents.maximum_volume
 					assembly_stage = ASSEMBLY_UNLOCKED
-					desc = initial(desc) + "\n Contains [length(containers)] containers[detonator?" and detonator":""]"
+					desc = initial(desc) + "\n Contains [length(containers)] containers[detonator?" and detonator":""][length(installed_modules)?" and [length(installed_modules)] module(s)":""]"
 			else
 				to_chat(user, SPAN_DANGER("\the [W] is empty."))
 

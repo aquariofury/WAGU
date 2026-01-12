@@ -26,6 +26,8 @@
 	antigrief_protection = TRUE //Should it be checked by antigrief?
 	ground_offset_x = 7
 	ground_offset_y = 6
+	// Bounce mechanics
+	var/bounces_remaining = 0
 
 /obj/item/explosive/grenade/Initialize()
 	. = ..()
@@ -135,6 +137,10 @@
 	if(active && ismob(LM.thrower))
 		var/mob/M = LM.thrower
 		M.count_niche_stat(STATISTICS_NICHE_GRENADES)
+	// Call module hooks for thrown grenades
+	if(length(installed_modules))
+		for(var/obj/item/grenade_module/GM in installed_modules)
+			GM.on_grenade_thrown(src, LM)
 	. = ..()
 
 
@@ -161,3 +167,15 @@
 	walk(src, null, null)
 	..()
 	return
+
+// Override rebound to handle bounce mechanics
+/obj/item/explosive/grenade/rebound(oldloc, launched_speed)
+	if(bounces_remaining > 0)
+		bounces_remaining--
+		playsound(src, 'sound/effects/bounce.ogg', 25, 1)
+		return ..() // Perform normal bounce
+	else if(active && rebounds)
+		// No bounces left and grenade is active - explode on impact
+		prime()
+		return
+	return ..()
