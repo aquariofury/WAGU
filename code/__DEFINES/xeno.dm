@@ -425,6 +425,9 @@
 #define RAVAGER_HEDGEHOG "Hedgehog"
 #define RAVAGER_BERSERKER "Berserker"
 
+// Warrior strain flags
+#define WARRIOR_ACIDER "Acider"
+
 // Defender strain flags
 #define DEFENDER_STEELCREST "Steelcrest"
 

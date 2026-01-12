@@ -13,6 +13,7 @@
 	evasion = XENO_EVASION_NONE
 	speed = XENO_SPEED_TIER_7
 
+	available_strains = list(/datum/xeno_strain/acider_warrior)
 	behavior_delegate_type = /datum/behavior_delegate/warrior_base
 
 	evolves_to = list(XENO_CASTE_PRAETORIAN, XENO_CASTE_CRUSHER)
@@ -82,7 +83,7 @@
 
 /mob/living/carbon/xenomorph/warrior/stop_pulling()
 	var/datum/behavior_delegate/warrior_base/warrior_delegate = behavior_delegate
-	if(isliving(pulling) && warrior_delegate.lunging)
+	if(istype(warrior_delegate) && isliving(pulling) && warrior_delegate.lunging)
 		warrior_delegate.lunging = FALSE // To avoid extreme cases of stopping a lunge then quickly pulling and stopping to pull someone else
 		var/mob/living/lunged = pulling
 		lunged.set_effect(0, STUN)
@@ -120,12 +121,14 @@
 				return // Grab was broken, probably as Stun side effect (eg. target getting knocked away from a manned M56D)
 			visible_message(SPAN_XENOWARNING("[src] grabs [living_mob] by the throat!"),
 			SPAN_XENOWARNING("We grab [living_mob] by the throat!"))
-			warrior_delegate.lunging = TRUE
-			addtimer(CALLBACK(src, PROC_REF(stop_lunging)), get_xeno_stun_duration(living_mob, 2) SECONDS + 1 SECONDS)
+			if(istype(warrior_delegate))
+				warrior_delegate.lunging = TRUE
+				addtimer(CALLBACK(src, PROC_REF(stop_lunging)), get_xeno_stun_duration(living_mob, 2) SECONDS + 1 SECONDS)
 
 /mob/living/carbon/xenomorph/warrior/proc/stop_lunging(world_time)
 	var/datum/behavior_delegate/warrior_base/warrior_delegate = behavior_delegate
-	warrior_delegate.lunging = FALSE
+	if(istype(warrior_delegate))
+		warrior_delegate.lunging = FALSE
 
 /mob/living/carbon/xenomorph/warrior/hitby(atom/movable/movable_atom)
 	if(ishuman(movable_atom))
