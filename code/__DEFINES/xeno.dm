@@ -48,6 +48,10 @@
 #define XENO_ACTION_QUEUE 2 // Tell the action handler to queue the action for next click
 #define XENO_ACTION_TOGGLE 3 // Action does something actively when toggled
 
+// Tail fishing click modes
+#define FISHING_CLICK_NONE 0 // Not fishing
+#define FISHING_CLICK_ACTIVE 1 // In the reaction window, waiting for player to click
+
 #define XENO_NOT_PRIMARY_ACTION -1    // NO primacy (never selected by default ability macros)
 #define XENO_PRIMARY_ACTION_1 0   // Is this action a "primary" action?
 #define XENO_PRIMARY_ACTION_2 1   // Second primary action

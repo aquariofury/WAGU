@@ -784,6 +784,24 @@
 /turf/open/gm/river/stop_crusher_charge()
 	return !covered
 
+/turf/open/gm/river/attack_alien(mob/living/carbon/xenomorph/xeno)
+	if(!fishing_allowed || covered)
+		return ..()
+
+	if(xeno.a_intent != INTENT_HELP || xeno.zone_selected != "groin")
+		return ..()
+
+	if(xeno.buckled || xeno.is_mob_incapacitated())
+		return XENO_NO_DELAY_ACTION
+
+	// Check if xeno is in the fishing success window
+	if(xeno.fishing_click_mode == FISHING_CLICK_ACTIVE && xeno.fishing_turf == src)
+		xeno.tail_fishing_success(src)
+		return XENO_NONCOMBAT_ACTION
+
+	// Start fishing
+	xeno.start_tail_fishing(src)
+	return XENO_NONCOMBAT_ACTION
 
 /turf/open/gm/river/poison/Initialize(mapload, ...)
 	. = ..()

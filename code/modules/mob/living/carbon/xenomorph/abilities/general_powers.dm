@@ -1190,6 +1190,72 @@
 	if(new_dir == dir)
 		setDir(last_dir)
 
+/// Starts the tail fishing minigame for xenomorphs
+/mob/living/carbon/xenomorph/proc/start_tail_fishing(turf/open/gm/river/water_turf)
+	if(!istype(water_turf) || !water_turf.fishing_allowed)
+		return
+
+	set waitfor = FALSE
+
+	var/fishing_start = 'sound/misc/fishing_Line.ogg'
+	var/fishing_failure = 'sound/misc/fishing_fail_splash.ogg'
+	var/fishing_event = 'sound/misc/bobber_water_splash.ogg'
+
+	// Tail animation - dip tail into water
+	tail_stab_animation(water_turf)
+
+	visible_message(SPAN_NOTICE("[src] dips its tail into \the [water_turf], fishing..."), \
+					SPAN_NOTICE("We dip our tail into \the [water_turf] and wait for prey..."))
+	playsound(src, fishing_start, 50, 1)
+
+	// Wait for fish (5-10 seconds)
+	if(!do_after(src, rand(5 SECONDS, 10 SECONDS), INTERRUPT_ALL, BUSY_ICON_HOSTILE, water_turf))
+		return
+
+	// Fish event trigger - enter the reaction window
+	fishing_click_mode = FISHING_CLICK_ACTIVE
+	fishing_turf = water_turf
+	playsound(src, fishing_event, 50, 1)
+	add_filter("fish_ready", 1, list("type" = "outline", "color" = "#26c9c64f", "size" = 2))
+
+	// Player has 0.5-2 seconds to click the turf again
+	sleep(rand(0.5 SECONDS, 2 SECONDS))
+
+	// Check if they clicked in time
+	if(fishing_click_mode == FISHING_CLICK_ACTIVE)
+		// Failed to click in time
+		fishing_click_mode = FISHING_CLICK_NONE
+		fishing_turf = null
+		playsound(src, fishing_failure, 50, 1)
+		visible_message(SPAN_NOTICE("[src] fails to catch anything."), \
+						SPAN_NOTICE("The prey escapes our tail..."))
+		remove_filter("fish_ready")
+
+/mob/living/carbon/xenomorph/proc/tail_fishing_success(turf/open/gm/river/water_turf)
+	if(fishing_click_mode != FISHING_CLICK_ACTIVE || fishing_turf != water_turf)
+		return
+
+	fishing_click_mode = FISHING_CLICK_NONE
+	fishing_turf = null
+	remove_filter("fish_ready")
+
+	var/fishing_success = 'sound/misc/fishing_set_hook.ogg'
+	var/common_weight = 80
+	var/uncommon_weight = 40
+	var/rare_weight = 5
+	var/ultra_rare_weight = 1
+
+	// Spawn loot
+	var/area/A = get_area(water_turf)
+	var/obj/item/caught_item = get_fishing_loot(water_turf, A, common_weight, uncommon_weight, rare_weight, ultra_rare_weight)
+
+	// Throw item to xeno
+	caught_item.throw_atom(get_turf(src), 2, 2, spin = TRUE, launch_type = HIGH_LAUNCH)
+	playsound(src, fishing_success, 50, 1)
+
+	visible_message(SPAN_NOTICE("[src] pulls \the [caught_item] from the water with its tail!"), \
+					SPAN_NOTICE("We catch \the [caught_item] with our tail!"))
+
 /datum/action/xeno_action/activable/tail_stab/proc/ability_act(mob/living/carbon/xenomorph/stabbing_xeno, mob/living/carbon/target, obj/limb/limb, apply_behavior_delagate = TRUE)
 
 	target.last_damage_data = create_cause_data(initial(stabbing_xeno.caste_type), stabbing_xeno)

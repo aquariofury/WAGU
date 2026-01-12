@@ -64,6 +64,10 @@
 	var/datum/weakref/hauled_mob
 	var/haul_timer
 
+	// Tail fishing state
+	var/fishing_click_mode = FISHING_CLICK_NONE
+	var/turf/fishing_turf = null
+
 	var/obj/item/iff_tag/iff_tag = null
 
 	var/static/list/walking_state_cache = list()
