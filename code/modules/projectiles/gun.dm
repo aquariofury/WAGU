@@ -1143,7 +1143,11 @@ and you're good to go.
 						unwield(user)
 						user.swap_hand()
 					unload(user, TRUE, drop_to_ground) // We want to quickly autoeject the magazine. This proc does the rest based on magazine type. User can be passed as null.
-					playsound(src, empty_sound, 25, 1)
+					playsound(src, empty_sound, 15, 1)
+					if(has_species(user, "Human"))
+						var/ooa_sound = user.gender == FEMALE ? get_sfx("female_outofammo") : get_sfx("male_outofammo")
+						spawn(5)
+							playsound(user, ooa_sound, 25)
 					SEND_SIGNAL(user, COMSIG_MOB_GUN_EMPTY, src)
 		else // Just fired a chambered bullet with no magazine in the gun
 			update_icon()
