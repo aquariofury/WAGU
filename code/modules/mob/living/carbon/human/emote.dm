@@ -159,6 +159,10 @@
 	emote_type = EMOTE_AUDIBLE|EMOTE_VISIBLE
 
 /datum/emote/living/carbon/human/medic/get_sound(mob/living/user)
+	if(ishuman(user))
+		var/mob/living/carbon/human/H = user
+		if(H.selected_voice_lines?["medic"] && length(H.selected_voice_lines["medic"]))
+			return pick(H.selected_voice_lines["medic"])
 	if(user.gender == MALE)
 		return pick('sound/voice/corpsman.ogg', 'sound/voice/corpsman_up.ogg', 'sound/voice/corpsman_over_here.ogg', 'sound/voice/i_need_a_corpsman_1.ogg', 'sound/voice/i_need_a_corpsman_2.ogg', 'sound/voice/im_hit_get_doc_up_here.ogg', 'sound/voice/get_doc_up_here_im_hit.ogg', 20;'sound/voice/i_cant_feel_my_legs_corpsman.ogg', 0.5;'sound/voice/human_male_medic_rare_1.ogg', 0.5;'sound/voice/human_male_medic.ogg', 1;'sound/voice/human_male_medic_rare_2.ogg')
 	else
@@ -202,6 +206,9 @@
 
 /datum/emote/living/carbon/human/pain/get_sound(mob/living/user)
 	if(ishuman_strict(user))
+		var/mob/living/carbon/human/H = user
+		if(H.selected_voice_lines?["pain"] && length(H.selected_voice_lines["pain"]))
+			return pick(H.selected_voice_lines["pain"])
 		if(user.gender == MALE)
 			return get_sfx("male_pain")
 		else
@@ -245,6 +252,9 @@
 
 /datum/emote/living/carbon/human/scream/get_sound(mob/living/user)
 	if(ishuman_strict(user))
+		var/mob/living/carbon/human/H = user
+		if(H.selected_voice_lines?["scream"] && length(H.selected_voice_lines["scream"]))
+			return pick(H.selected_voice_lines["scream"])
 		if(user.gender == MALE)
 			return get_sfx("male_scream")
 		else
@@ -368,6 +378,9 @@
 
 /datum/emote/living/carbon/human/warcry/get_sound(mob/living/user)
 	if(ishumansynth_strict(user))
+		var/mob/living/carbon/human/H = user
+		if(H.selected_voice_lines?["warcry"] && length(H.selected_voice_lines["warcry"]))
+			return pick(H.selected_voice_lines["warcry"])
 		switch(user.faction)
 			if(FACTION_UPP, FACTION_HUNTED_UPP)
 				return get_sfx("[user.gender]_upp_warcry")

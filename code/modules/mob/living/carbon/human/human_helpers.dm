@@ -481,3 +481,11 @@
 		headset = wear_r_ear
 	if(headset)
 		headset.update_minimap_icon()
+
+/// Returns a voice sound for the given emote category, using custom selections if available, otherwise falling back to gender-based defaults
+/mob/living/carbon/human/proc/get_voice_sound(category)
+	if(selected_voice_lines?[category] && length(selected_voice_lines[category]))
+		return pick(selected_voice_lines[category])
+	// Fallback to gender-based default
+	var/gender_prefix = gender == FEMALE ? "female" : "male"
+	return get_sfx("[gender_prefix]_[category]")

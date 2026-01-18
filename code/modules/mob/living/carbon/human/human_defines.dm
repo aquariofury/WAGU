@@ -31,6 +31,7 @@
 	var/body_size = "Average" // Body Size
 	var/body_type = "Lean" // Body Buffness
 	var/body_presentation
+	var/list/selected_voice_lines // Selected voice lines for emotes from character creation
 
 	//Skin color
 	var/r_skin = 0

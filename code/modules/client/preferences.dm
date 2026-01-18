@@ -38,6 +38,7 @@ GLOBAL_LIST_INIT(be_special_flags, list(
 	var/static/datum/traits_picker/traits_picker = new
 	var/static/datum/loadout_picker/loadout_picker = new
 	var/static/datum/flavor_text_editor/flavor_text_editor = new
+	var/static/datum/voiceline_picker/voiceline_picker = new
 
 	var/static/datum/pred_picker/pred_picker = new
 
@@ -160,6 +161,7 @@ GLOBAL_LIST_INIT(be_special_flags, list(
 	var/be_random_body = 0 //whether we have a random appearance every round
 	var/gender = MALE //gender of character (well duh)
 	var/body_presentation
+	var/list/selected_voice_lines = list() //selected voice lines by category for emotes
 
 	var/age = 19 //age of character
 	var/spawnpoint = "Arrivals Shuttle" //where this character will spawn (0-2).
@@ -414,6 +416,10 @@ GLOBAL_LIST_INIT(be_special_flags, list(
 			dat += "<a href='byond://?_src_=prefs;preference=all;task=random'>&reg;</A></h2>"
 			dat += "<b>Age:</b> <a href='byond://?_src_=prefs;preference=age;task=input'><b>[age]</b></a><br>"
 			dat += "<b>Gender:</b> <a href='byond://?_src_=prefs;preference=gender'><b>[gender == PLURAL ? "Non-Binary" : gender == MALE ? "Male" : "Female"]</b></a><br>"
+			var/voice_count = 0
+			for(var/cat in selected_voice_lines)
+				voice_count += length(selected_voice_lines[cat])
+			dat += "<b>Voice Lines:</b> <a href='byond://?src=\ref[user];preference=voice_lines'><b>[voice_count ? "[voice_count] selected" : "Customize"]</b></a><br>"
 
 			dat += "<b>Skin Color:</b> [skin_color]<br>"
 			dat += "<b>Body Size:</b> [body_size]<br>"
@@ -1152,6 +1158,10 @@ GLOBAL_LIST_INIT(be_special_flags, list(
 
 		if("traits")
 			traits_picker.tgui_interact(user)
+			return
+
+		if("voice_lines")
+			voiceline_picker.tgui_interact(user)
 			return
 
 		if("toggle_job_gear")
@@ -2130,6 +2140,8 @@ GLOBAL_LIST_INIT(be_special_flags, list(
 	character.body_type = body_type
 	character.body_size = body_size
 	character.body_presentation = get_body_presentation()
+	if(selected_voice_lines)
+		character.selected_voice_lines = selected_voice_lines.Copy()
 
 	character.r_eyes = r_eyes
 	character.g_eyes = g_eyes
@@ -2212,6 +2224,8 @@ GLOBAL_LIST_INIT(be_special_flags, list(
 	character.body_type = body_type
 	character.body_size = body_size
 	character.body_presentation = get_body_presentation()
+	if(selected_voice_lines)
+		character.selected_voice_lines = selected_voice_lines.Copy()
 
 	character.r_eyes = r_eyes
 	character.g_eyes = g_eyes

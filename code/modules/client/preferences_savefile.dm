@@ -747,6 +747,7 @@
 	S["faction"] >> faction
 	S["religion"] >> religion
 	S["traits"] >> traits
+	S["selected_voice_lines"] >> selected_voice_lines
 
 	S["preferred_squad"] >> preferred_squad
 	S["preferred_spec"] >> preferred_spec
@@ -828,6 +829,8 @@
 	traits = sanitize_list(traits)
 	read_traits = FALSE
 	trait_points = initial(trait_points)
+
+	selected_voice_lines = sanitize_voice_lines(selected_voice_lines)
 
 	if(!origin)
 		origin = ORIGIN_USCM
@@ -913,6 +916,7 @@
 	S["faction"] << faction
 	S["religion"] << religion
 	S["traits"] << traits
+	S["selected_voice_lines"] << selected_voice_lines
 
 	S["weyland_yutani_relation"] << weyland_yutani_relation
 	S["preferred_squad"] << preferred_squad

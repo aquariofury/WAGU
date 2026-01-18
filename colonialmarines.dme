@@ -1692,6 +1692,7 @@
 #include "code\modules\client\preferences_toggles.dm"
 #include "code\modules\client\tgui_macro.dm"
 #include "code\modules\client\traits_picker.dm"
+#include "code\modules\client\voiceline_picker.dm"
 #include "code\modules\clothing\clothing.dm"
 #include "code\modules\clothing\clothing_accessories.dm"
 #include "code\modules\clothing\clothing_helpers.dm"
