@@ -191,8 +191,9 @@ GLOBAL_LIST_INIT(voice_line_categories, list(
 
 	.["selected"] = list()
 	for(var/category_key in GLOB.voice_line_categories)
-		if(prefs.selected_voice_lines?[category_key])
-			.["selected"][category_key] = prefs.selected_voice_lines[category_key].Copy()
+		if(prefs.selected_voice_lines && prefs.selected_voice_lines[category_key])
+			var/list/category_list = prefs.selected_voice_lines[category_key]
+			.["selected"][category_key] = category_list.Copy()
 		else
 			.["selected"][category_key] = list()
 
