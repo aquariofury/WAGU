@@ -32,6 +32,7 @@
 	var/body_type = "Lean" // Body Buffness
 	var/body_presentation
 	var/list/selected_voice_lines // Selected voice lines for emotes from character creation
+	var/enable_rare_sounds = FALSE // Whether to include rare sounds with low probability
 
 	//Skin color
 	var/r_skin = 0

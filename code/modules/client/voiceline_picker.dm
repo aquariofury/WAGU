@@ -1,5 +1,26 @@
 // Voice Line Picker - Allows players to select individual voice lines for emotes
 
+// List of rare sound paths - these have a low chance of playing when enable_rare_sounds is on
+GLOBAL_LIST_INIT(rare_voice_lines, list(
+	// Rare warcries
+	'sound/voice/warcry/warcry_male_rare_1.ogg',
+	'sound/voice/warcry/warcry_male_rare_2.ogg',
+	'sound/voice/warcry/warcry_male_rare_3.ogg',
+	'sound/voice/warcry/warcry_male_rare_4.ogg',
+	'sound/voice/warcry/warcry_male_rare_5.ogg',
+	// Rare screams
+	'sound/voice/human_jackson_scream.ogg',
+	'sound/voice/human_ack_scream.ogg',
+	'sound/voice/human_tantrum_scream.ogg',
+	// Rare pain
+	'sound/voice/human_male_pain_rare_1.ogg',
+	'sound/voice/human_bobby_pain.ogg',
+	'sound/voice/tomscream.ogg',
+	// Rare medic
+	'sound/voice/human_male_medic_rare_1.ogg',
+	'sound/voice/human_male_medic_rare_2.ogg'
+))
+
 GLOBAL_LIST_INIT(voice_line_categories, list(
 	"warcry" = list(
 		"name" = "Warcry",
@@ -45,11 +66,6 @@ GLOBAL_LIST_INIT(voice_line_categories, list(
 			'sound/voice/warcry/warcry_male_33.ogg',
 			'sound/voice/warcry/warcry_male_34.ogg',
 			'sound/voice/warcry/warcry_male_35.ogg',
-			'sound/voice/warcry/warcry_male_rare_1.ogg',
-			'sound/voice/warcry/warcry_male_rare_2.ogg',
-			'sound/voice/warcry/warcry_male_rare_3.ogg',
-			'sound/voice/warcry/warcry_male_rare_4.ogg',
-			'sound/voice/warcry/warcry_male_rare_5.ogg',
 			// Female warcries
 			'sound/voice/warcry/female_charge.ogg',
 			'sound/voice/warcry/female_yell1.ogg',
@@ -73,6 +89,13 @@ GLOBAL_LIST_INIT(voice_line_categories, list(
 			'sound/voice/warcry/warcry_female_18.ogg',
 			'sound/voice/warcry/warcry_female_19.ogg',
 			'sound/voice/warcry/warcry_female_20.ogg'
+		),
+		"rare_sounds" = list(
+			'sound/voice/warcry/warcry_male_rare_1.ogg',
+			'sound/voice/warcry/warcry_male_rare_2.ogg',
+			'sound/voice/warcry/warcry_male_rare_3.ogg',
+			'sound/voice/warcry/warcry_male_rare_4.ogg',
+			'sound/voice/warcry/warcry_male_rare_5.ogg'
 		)
 	),
 	"scream" = list(
@@ -86,15 +109,17 @@ GLOBAL_LIST_INIT(voice_line_categories, list(
 			'sound/voice/human_male_scream_4.ogg',
 			'sound/voice/human_male_scream_5.ogg',
 			'sound/voice/human_male_scream_6.ogg',
-			'sound/voice/human_jackson_scream.ogg',
-			'sound/voice/human_ack_scream.ogg',
-			'sound/voice/human_tantrum_scream.ogg',
 			// Female screams
 			'sound/voice/human_female_scream_1.ogg',
 			'sound/voice/human_female_scream_2.ogg',
 			'sound/voice/human_female_scream_3.ogg',
 			'sound/voice/human_female_scream_4.ogg',
 			'sound/voice/human_female_scream_5.ogg'
+		),
+		"rare_sounds" = list(
+			'sound/voice/human_jackson_scream.ogg',
+			'sound/voice/human_ack_scream.ogg',
+			'sound/voice/human_tantrum_scream.ogg'
 		)
 	),
 	"pain" = list(
@@ -106,15 +131,17 @@ GLOBAL_LIST_INIT(voice_line_categories, list(
 			'sound/voice/human_male_pain_2.ogg',
 			'sound/voice/human_male_pain_3.ogg',
 			'sound/voice/human_male_pain_4.ogg',
-			'sound/voice/human_male_pain_rare_1.ogg',
-			'sound/voice/human_bobby_pain.ogg',
-			'sound/voice/tomscream.ogg',
 			// Female pain
 			'sound/voice/human_female_pain_1.ogg',
 			'sound/voice/human_female_pain_2.ogg',
 			'sound/voice/human_female_pain_3.ogg',
 			'sound/voice/human_female_pain_4.ogg',
 			'sound/voice/human_female_pain_5.ogg'
+		),
+		"rare_sounds" = list(
+			'sound/voice/human_male_pain_rare_1.ogg',
+			'sound/voice/human_bobby_pain.ogg',
+			'sound/voice/tomscream.ogg'
 		)
 	),
 	"medic" = list(
@@ -131,10 +158,12 @@ GLOBAL_LIST_INIT(voice_line_categories, list(
 			'sound/voice/get_doc_up_here_im_hit.ogg',
 			'sound/voice/i_cant_feel_my_legs_corpsman.ogg',
 			'sound/voice/human_male_medic.ogg',
-			'sound/voice/human_male_medic_rare_1.ogg',
-			'sound/voice/human_male_medic_rare_2.ogg',
 			// Female medic calls
 			'sound/voice/human_female_medic.ogg'
+		),
+		"rare_sounds" = list(
+			'sound/voice/human_male_medic_rare_1.ogg',
+			'sound/voice/human_male_medic_rare_2.ogg'
 		)
 	),
 	"fragout" = list(
@@ -174,13 +203,29 @@ GLOBAL_LIST_INIT(voice_line_categories, list(
 			var/display_name = copytext(filename, 1, findlasttext(filename, ".ogg"))
 			sounds += list(list(
 				"path" = "[sound_path]",
-				"name" = display_name
+				"name" = display_name,
+				"rare" = FALSE
 			))
+		// Add rare sounds if the category has them
+		var/list/rare_sounds = list()
+		if(category["rare_sounds"])
+			for(var/sound_path in category["rare_sounds"])
+				var/filename = "[sound_path]"
+				var/last_slash = findlasttext(filename, "/")
+				if(last_slash)
+					filename = copytext(filename, last_slash + 1)
+				var/display_name = copytext(filename, 1, findlasttext(filename, ".ogg"))
+				rare_sounds += list(list(
+					"path" = "[sound_path]",
+					"name" = display_name,
+					"rare" = TRUE
+				))
 		.["categories"] += list(list(
 			"key" = category_key,
 			"name" = category["name"],
 			"description" = category["description"],
-			"sounds" = sounds
+			"sounds" = sounds,
+			"rare_sounds" = rare_sounds
 		))
 
 /datum/voiceline_picker/ui_data(mob/user)
@@ -196,6 +241,7 @@ GLOBAL_LIST_INIT(voice_line_categories, list(
 			.["selected"][category_key] = category_list.Copy()
 		else
 			.["selected"][category_key] = list()
+	.["enable_rare_sounds"] = prefs.enable_rare_sounds
 
 /datum/voiceline_picker/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
 	. = ..()
@@ -226,13 +272,18 @@ GLOBAL_LIST_INIT(voice_line_categories, list(
 			if(sound_path in prefs.selected_voice_lines[category])
 				prefs.selected_voice_lines[category] -= sound_path
 			else
-				// Validate sound exists in category
+				// Validate sound exists in category (regular or rare sounds)
 				var/list/category_data = GLOB.voice_line_categories[category]
 				var/valid = FALSE
 				for(var/valid_sound in category_data["sounds"])
 					if("[valid_sound]" == sound_path)
 						valid = TRUE
 						break
+				if(!valid && category_data["rare_sounds"])
+					for(var/valid_sound in category_data["rare_sounds"])
+						if("[valid_sound]" == sound_path)
+							valid = TRUE
+							break
 				if(valid)
 					prefs.selected_voice_lines[category] += sound_path
 			return TRUE
@@ -252,6 +303,10 @@ GLOBAL_LIST_INIT(voice_line_categories, list(
 			prefs.selected_voice_lines[category] = list()
 			for(var/sound_path in category_data["sounds"])
 				prefs.selected_voice_lines[category] += "[sound_path]"
+			// Also include rare sounds if enabled
+			if(prefs.enable_rare_sounds && category_data["rare_sounds"])
+				for(var/sound_path in category_data["rare_sounds"])
+					prefs.selected_voice_lines[category] += "[sound_path]"
 			return TRUE
 
 		if("clear")
@@ -260,6 +315,10 @@ GLOBAL_LIST_INIT(voice_line_categories, list(
 				return FALSE
 
 			prefs.selected_voice_lines[category] = list()
+			return TRUE
+
+		if("toggle_rare_sounds")
+			prefs.enable_rare_sounds = !prefs.enable_rare_sounds
 			return TRUE
 
 	return FALSE
@@ -285,13 +344,34 @@ GLOBAL_LIST_INIT(voice_line_categories, list(
 		var/list/valid_sounds = list()
 
 		for(var/sound_path in voice_lines[category_key])
-			// Check if sound exists in the category
+			// Check if sound exists in the category (regular sounds)
+			var/found = FALSE
 			for(var/valid_sound in category_data["sounds"])
 				if("[valid_sound]" == sound_path)
 					valid_sounds += sound_path
+					found = TRUE
 					break
+			// Also check rare sounds
+			if(!found && category_data["rare_sounds"])
+				for(var/valid_sound in category_data["rare_sounds"])
+					if("[valid_sound]" == sound_path)
+						valid_sounds += sound_path
+						break
 
 		if(length(valid_sounds))
 			sanitized[category_key] = valid_sounds
 
 	return sanitized
+
+/// Gets a voice line for an emote category, respecting user preferences and rare sound settings
+/// Returns a sound path to play
+/proc/get_voice_line(mob/living/carbon/human/H, category)
+	if(!ishuman(H))
+		return null
+
+	// If the user has selected specific voice lines for this category, use those
+	if(H.selected_voice_lines?[category] && length(H.selected_voice_lines[category]))
+		return pick(H.selected_voice_lines[category])
+
+	// Otherwise, return null to use default behavior
+	return null

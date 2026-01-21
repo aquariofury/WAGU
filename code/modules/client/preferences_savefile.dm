@@ -748,6 +748,7 @@
 	S["religion"] >> religion
 	S["traits"] >> traits
 	S["selected_voice_lines"] >> selected_voice_lines
+	S["enable_rare_sounds"] >> enable_rare_sounds
 
 	S["preferred_squad"] >> preferred_squad
 	S["preferred_spec"] >> preferred_spec
@@ -831,6 +832,7 @@
 	trait_points = initial(trait_points)
 
 	selected_voice_lines = sanitize_voice_lines(selected_voice_lines)
+	enable_rare_sounds = sanitize_integer(enable_rare_sounds, FALSE, TRUE, FALSE)
 
 	if(!origin)
 		origin = ORIGIN_USCM
@@ -917,6 +919,7 @@
 	S["religion"] << religion
 	S["traits"] << traits
 	S["selected_voice_lines"] << selected_voice_lines
+	S["enable_rare_sounds"] << enable_rare_sounds
 
 	S["weyland_yutani_relation"] << weyland_yutani_relation
 	S["preferred_squad"] << preferred_squad

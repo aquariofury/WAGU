@@ -162,6 +162,7 @@ GLOBAL_LIST_INIT(be_special_flags, list(
 	var/gender = MALE //gender of character (well duh)
 	var/body_presentation
 	var/list/selected_voice_lines = list() //selected voice lines by category for emotes
+	var/enable_rare_sounds = FALSE //whether to include rare sounds with low probability
 
 	var/age = 19 //age of character
 	var/spawnpoint = "Arrivals Shuttle" //where this character will spawn (0-2).
@@ -2142,6 +2143,7 @@ GLOBAL_LIST_INIT(be_special_flags, list(
 	character.body_presentation = get_body_presentation()
 	if(selected_voice_lines)
 		character.selected_voice_lines = selected_voice_lines.Copy()
+	character.enable_rare_sounds = enable_rare_sounds
 
 	character.r_eyes = r_eyes
 	character.g_eyes = g_eyes
@@ -2226,6 +2228,7 @@ GLOBAL_LIST_INIT(be_special_flags, list(
 	character.body_presentation = get_body_presentation()
 	if(selected_voice_lines)
 		character.selected_voice_lines = selected_voice_lines.Copy()
+	character.enable_rare_sounds = enable_rare_sounds
 
 	character.r_eyes = r_eyes
 	character.g_eyes = g_eyes

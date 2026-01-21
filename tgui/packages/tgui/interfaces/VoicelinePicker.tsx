@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { useBackend } from 'tgui/backend';
-import { Box, Button, Icon, Section, Stack, Tooltip } from 'tgui/components';
+import { Box, Button, Section, Stack, Tooltip } from 'tgui/components';
 import { Window } from 'tgui/layouts';
 
 type VoicelinePickerData = {
   categories: Category[];
   selected: Record<string, string[]>;
+  enable_rare_sounds: boolean;
 };
 
 type Category = {
@@ -13,16 +14,18 @@ type Category = {
   name: string;
   description: string;
   sounds: Sound[];
+  rare_sounds: Sound[];
 };
 
 type Sound = {
   path: string;
   name: string;
+  rare: boolean;
 };
 
 export const VoicelinePicker = () => {
-  const { data } = useBackend<VoicelinePickerData>();
-  const { categories, selected } = data;
+  const { act, data } = useBackend<VoicelinePickerData>();
+  const { categories, selected, enable_rare_sounds } = data;
 
   const [activeCategory, setActiveCategory] = useState(categories[0]);
 
@@ -32,7 +35,11 @@ export const VoicelinePicker = () => {
 
   const getTotalCount = (categoryKey: string) => {
     const category = categories.find((c) => c.key === categoryKey);
-    return category?.sounds.length || 0;
+    let total = category?.sounds.length || 0;
+    if (enable_rare_sounds && category?.rare_sounds) {
+      total += category.rare_sounds.length;
+    }
+    return total;
   };
 
   return (
@@ -41,7 +48,7 @@ export const VoicelinePicker = () => {
         <Stack fill vertical>
           <Stack.Item>
             <Section>
-              <Stack wrap>
+              <Stack wrap align="center">
                 {categories.map((category) => (
                   <Stack.Item key={category.key}>
                     <Button
@@ -53,11 +60,25 @@ export const VoicelinePicker = () => {
                     </Button>
                   </Stack.Item>
                 ))}
+                <Stack.Item grow />
+                <Stack.Item>
+                  <Tooltip content="When enabled, rare sounds have a small chance to play randomly">
+                    <Button.Checkbox
+                      checked={enable_rare_sounds}
+                      onClick={() => act('toggle_rare_sounds')}
+                    >
+                      Enable Rare Sounds
+                    </Button.Checkbox>
+                  </Tooltip>
+                </Stack.Item>
               </Stack>
             </Section>
           </Stack.Item>
           <Stack.Item grow>
-            <CategoryPanel category={activeCategory} />
+            <CategoryPanel
+              category={activeCategory}
+              enableRareSounds={enable_rare_sounds}
+            />
           </Stack.Item>
         </Stack>
       </Window.Content>
@@ -65,13 +86,19 @@ export const VoicelinePicker = () => {
   );
 };
 
-const CategoryPanel = (props: { readonly category: Category }) => {
-  const { category } = props;
+const CategoryPanel = (props: {
+  readonly category: Category;
+  readonly enableRareSounds: boolean;
+}) => {
+  const { category, enableRareSounds } = props;
   const { act, data } = useBackend<VoicelinePickerData>();
   const { selected } = data;
 
   const selectedSounds = selected[category.key] || [];
-  const allSelected = selectedSounds.length === category.sounds.length;
+  const totalSounds =
+    category.sounds.length +
+    (enableRareSounds ? category.rare_sounds?.length || 0 : 0);
+  const allSelected = selectedSounds.length === totalSounds;
 
   return (
     <Section
@@ -121,6 +148,17 @@ const CategoryPanel = (props: { readonly category: Category }) => {
             />
           </Stack.Item>
         ))}
+        {enableRareSounds &&
+          category.rare_sounds?.map((sound) => (
+            <Stack.Item key={sound.path}>
+              <SoundRow
+                sound={sound}
+                categoryKey={category.key}
+                isSelected={selectedSounds.includes(sound.path)}
+                isRare
+              />
+            </Stack.Item>
+          ))}
       </Stack>
     </Section>
   );
@@ -130,8 +168,9 @@ const SoundRow = (props: {
   readonly sound: Sound;
   readonly categoryKey: string;
   readonly isSelected: boolean;
+  readonly isRare?: boolean;
 }) => {
-  const { sound, categoryKey, isSelected } = props;
+  const { sound, categoryKey, isSelected, isRare } = props;
   const { act } = useBackend<VoicelinePickerData>();
 
   return (
@@ -152,6 +191,11 @@ const SoundRow = (props: {
             }
           >
             {sound.name}
+            {isRare && (
+              <Box as="span" ml={1} color="gold">
+                (Rare)
+              </Box>
+            )}
           </Button.Checkbox>
         </Stack.Item>
         <Stack.Item>

@@ -163,8 +163,11 @@
 		var/mob/living/carbon/human/H = user
 		if(H.selected_voice_lines?["medic"] && length(H.selected_voice_lines["medic"]))
 			return pick(H.selected_voice_lines["medic"])
+		// If enable_rare_sounds is on, use weighted picks with rare sounds
+		if(H.enable_rare_sounds && user.gender == MALE)
+			return pick('sound/voice/corpsman.ogg', 'sound/voice/corpsman_up.ogg', 'sound/voice/corpsman_over_here.ogg', 'sound/voice/i_need_a_corpsman_1.ogg', 'sound/voice/i_need_a_corpsman_2.ogg', 'sound/voice/im_hit_get_doc_up_here.ogg', 'sound/voice/get_doc_up_here_im_hit.ogg', 20;'sound/voice/i_cant_feel_my_legs_corpsman.ogg', 0.5;'sound/voice/human_male_medic_rare_1.ogg', 0.5;'sound/voice/human_male_medic.ogg', 1;'sound/voice/human_male_medic_rare_2.ogg')
 	if(user.gender == MALE)
-		return pick('sound/voice/corpsman.ogg', 'sound/voice/corpsman_up.ogg', 'sound/voice/corpsman_over_here.ogg', 'sound/voice/i_need_a_corpsman_1.ogg', 'sound/voice/i_need_a_corpsman_2.ogg', 'sound/voice/im_hit_get_doc_up_here.ogg', 'sound/voice/get_doc_up_here_im_hit.ogg', 20;'sound/voice/i_cant_feel_my_legs_corpsman.ogg', 0.5;'sound/voice/human_male_medic_rare_1.ogg', 0.5;'sound/voice/human_male_medic.ogg', 1;'sound/voice/human_male_medic_rare_2.ogg')
+		return pick('sound/voice/corpsman.ogg', 'sound/voice/corpsman_up.ogg', 'sound/voice/corpsman_over_here.ogg', 'sound/voice/i_need_a_corpsman_1.ogg', 'sound/voice/i_need_a_corpsman_2.ogg', 'sound/voice/im_hit_get_doc_up_here.ogg', 'sound/voice/get_doc_up_here_im_hit.ogg', 20;'sound/voice/i_cant_feel_my_legs_corpsman.ogg', 'sound/voice/human_male_medic.ogg')
 	else
 		return 'sound/voice/human_female_medic.ogg'
 
@@ -209,8 +212,14 @@
 		var/mob/living/carbon/human/H = user
 		if(H.selected_voice_lines?["pain"] && length(H.selected_voice_lines["pain"]))
 			return pick(H.selected_voice_lines["pain"])
+		// If enable_rare_sounds is on, use weighted picks with rare sounds
+		if(H.enable_rare_sounds)
+			if(user.gender == MALE)
+				return pick('sound/voice/human_male_pain_1.ogg','sound/voice/human_male_pain_2.ogg','sound/voice/human_male_pain_3.ogg','sound/voice/human_male_pain_4.ogg',5;'sound/voice/tomscream.ogg',5;'sound/voice/human_bobby_pain.ogg', 5;'sound/voice/human_male_pain_rare_1.ogg')
+			else
+				return get_sfx("female_pain")
 		if(user.gender == MALE)
-			return get_sfx("male_pain")
+			return pick('sound/voice/human_male_pain_1.ogg','sound/voice/human_male_pain_2.ogg','sound/voice/human_male_pain_3.ogg','sound/voice/human_male_pain_4.ogg')
 		else
 			return get_sfx("female_pain")
 
@@ -255,10 +264,16 @@
 		var/mob/living/carbon/human/H = user
 		if(H.selected_voice_lines?["scream"] && length(H.selected_voice_lines["scream"]))
 			return pick(H.selected_voice_lines["scream"])
+		// If enable_rare_sounds is on, use weighted picks with rare sounds
+		if(H.enable_rare_sounds)
+			if(user.gender == MALE)
+				return pick('sound/voice/human_male_scream_1.ogg','sound/voice/human_male_scream_2.ogg','sound/voice/human_male_scream_3.ogg','sound/voice/human_male_scream_4.ogg',5;'sound/voice/human_male_scream_5.ogg',5;'sound/voice/human_jackson_scream.ogg',5;'sound/voice/human_ack_scream.ogg','sound/voice/human_male_scream_6.ogg')
+			else
+				return pick('sound/voice/human_female_scream_1.ogg','sound/voice/human_female_scream_2.ogg','sound/voice/human_female_scream_3.ogg','sound/voice/human_female_scream_4.ogg','sound/voice/human_female_scream_5.ogg')
 		if(user.gender == MALE)
-			return get_sfx("male_scream")
+			return pick('sound/voice/human_male_scream_1.ogg','sound/voice/human_male_scream_2.ogg','sound/voice/human_male_scream_3.ogg','sound/voice/human_male_scream_4.ogg','sound/voice/human_male_scream_5.ogg','sound/voice/human_male_scream_6.ogg')
 		else
-			return get_sfx("female_scream")
+			return pick('sound/voice/human_female_scream_1.ogg','sound/voice/human_female_scream_2.ogg','sound/voice/human_female_scream_3.ogg','sound/voice/human_female_scream_4.ogg','sound/voice/human_female_scream_5.ogg')
 	if(isyautja(user))
 		return get_sfx("pred_pain")
 
@@ -385,7 +400,11 @@
 			if(FACTION_UPP, FACTION_HUNTED_UPP)
 				return get_sfx("[user.gender]_upp_warcry")
 			else
-				return get_sfx("[user.gender]_warcry")
+				// If enable_rare_sounds is on, use weighted picks with rare sounds
+				if(H.enable_rare_sounds)
+					return get_sfx("[user.gender]_warcry")
+				// Otherwise use non-rare warcry sounds
+				return get_sfx("[user.gender]_warcry_no_rare")
 
 /datum/emote/living/carbon/human/whimper
 	key = "whimper"
