@@ -14,6 +14,15 @@ const PAGES = {
   main: () => MainMenu,
   vents: () => SecVents,
   printer: () => Printer,
+  legal_requests: () => LegalRequests,
+};
+
+type LegalRequestRecord = {
+  ref: string;
+  requester_name: string;
+  reason: string;
+  time: string;
+  source: string;
 };
 
 type Data = {
@@ -33,6 +42,11 @@ type Data = {
   restricted_camera: BooleanLike;
   printer_cooldown: BooleanLike;
   available_documents: string[];
+  can_request_legal_team: BooleanLike;
+  legal_request_cooldown: BooleanLike;
+  is_legal_approver: BooleanLike;
+  legal_dispatch_cooldown: BooleanLike;
+  pending_legal_requests: LegalRequestRecord[];
 };
 
 export const WYComputer = (props) => {
@@ -139,6 +153,10 @@ const MainMenu = (props) => {
     sec_flash_cooldown,
     restricted_camera,
     printer_cooldown,
+    can_request_legal_team,
+    legal_request_cooldown,
+    is_legal_approver,
+    pending_legal_requests,
   } = data;
 
   return (
@@ -220,6 +238,54 @@ const MainMenu = (props) => {
                 onClick={() => act('page_access')}
               >
                 View Access Log
+              </Button>
+            </Stack.Item>
+          </Stack>
+        )}
+
+        {!!can_request_legal_team && access_level >= 4 && (
+          <Stack>
+            <Stack.Item grow>
+              <h3>Corporate Affairs Relay</h3>
+            </Stack.Item>
+            <Stack.Item>
+              <Button.Confirm
+                tooltip="Transmit a request for Corporate Legal Team deployment to Weyland-Yutani HC."
+                icon="gavel"
+                ml="auto"
+                px="2rem"
+                width="100%"
+                bold
+                disabled={legal_request_cooldown}
+                onClick={() => act('request_legal_team')}
+              >
+                {legal_request_cooldown
+                  ? 'Legal Team Relay Cooling Down'
+                  : 'Request Corporate Legal Team'}
+              </Button.Confirm>
+            </Stack.Item>
+          </Stack>
+        )}
+
+        {!!is_legal_approver && access_level >= 5 && (
+          <Stack>
+            <Stack.Item grow>
+              <h3>Corporate Affairs Triage</h3>
+            </Stack.Item>
+            <Stack.Item>
+              <Button
+                tooltip="Review pending Corporate Legal Team requests and dispatch options."
+                icon="gavel"
+                ml="auto"
+                px="2rem"
+                width="100%"
+                bold
+                onClick={() => act('page_legal_requests')}
+              >
+                Legal Team Requests
+                {pending_legal_requests && pending_legal_requests.length > 0
+                  ? ` (${pending_legal_requests.length} pending)`
+                  : ''}
               </Button>
             </Stack.Item>
           </Stack>
@@ -518,6 +584,132 @@ const Printer = (props) => {
             </Button.Confirm>
           );
         })}
+      </Section>
+    </>
+  );
+};
+
+const LegalRequests = (props) => {
+  const { data, act } = useBackend<Data>();
+  const {
+    logged_in,
+    access_text,
+    last_page,
+    current_menu,
+    pending_legal_requests,
+    legal_dispatch_cooldown,
+  } = data;
+
+  return (
+    <>
+      <Section>
+        <Flex align="center">
+          <Box>
+            <Button
+              icon="arrow-left"
+              px="2rem"
+              textAlign="center"
+              tooltip="Go back"
+              onClick={() => act('go_back')}
+              disabled={last_page === current_menu}
+            />
+            <Button
+              icon="house"
+              ml="auto"
+              mr="1rem"
+              tooltip="Navigation Menu"
+              onClick={() => act('home')}
+              disabled={current_menu === 'main'}
+            />
+          </Box>
+
+          <h3>
+            {logged_in}, {access_text}
+          </h3>
+
+          <Button.Confirm
+            icon="circle-user"
+            ml="auto"
+            px="2rem"
+            bold
+            onClick={() => act('logout')}
+          >
+            Logout
+          </Button.Confirm>
+        </Flex>
+      </Section>
+
+      <Section>
+        <h1 style={{ textAlign: 'center' }}>Corporate Legal Team Triage</h1>
+      </Section>
+
+      <Section title="Pending Requests">
+        {pending_legal_requests && pending_legal_requests.length > 0 ? (
+          pending_legal_requests.map((request) => (
+            <Section
+              key={request.ref}
+              title={`${request.requester_name} — ${request.time} [${request.source === 'beacon' ? 'BEACON' : 'INTRANET'}]`}
+            >
+              <Box mb="0.5rem" italic>
+                {request.reason}
+              </Box>
+              <Stack>
+                <Stack.Item grow>
+                  <Button.Confirm
+                    icon="check"
+                    color="good"
+                    width="100%"
+                    bold
+                    tooltip="Approve this request. A Corporate Lawyer ERT will be dispatched."
+                    onClick={() =>
+                      act('approve_legal_request', { ref: request.ref })
+                    }
+                  >
+                    Approve
+                  </Button.Confirm>
+                </Stack.Item>
+                <Stack.Item grow>
+                  <Button.Confirm
+                    icon="xmark"
+                    color="bad"
+                    width="100%"
+                    bold
+                    tooltip="Deny this request. The requester will be notified."
+                    onClick={() =>
+                      act('deny_legal_request', { ref: request.ref })
+                    }
+                  >
+                    Deny
+                  </Button.Confirm>
+                </Stack.Item>
+              </Stack>
+            </Section>
+          ))
+        ) : (
+          <Box color="label" textAlign="center">
+            No pending legal team requests.
+          </Box>
+        )}
+      </Section>
+
+      <Section title="Direct Dispatch">
+        <Box mb="0.5rem" color="label">
+          Authorise a Corporate Legal Team deployment without an outstanding
+          request. Use sparingly.
+        </Box>
+        <Button.Confirm
+          icon="paper-plane"
+          color="caution"
+          width="100%"
+          bold
+          disabled={legal_dispatch_cooldown}
+          tooltip="Dispatch the Corporate Legal Team ERT directly. You'll be asked for a reason."
+          onClick={() => act('dispatch_legal_team')}
+        >
+          {legal_dispatch_cooldown
+            ? 'Dispatch Relay Cooling Down'
+            : 'Dispatch Legal Team Now'}
+        </Button.Confirm>
       </Section>
     </>
   );

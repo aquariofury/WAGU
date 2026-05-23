@@ -3674,7 +3674,14 @@
 "KR" = (
 /obj/structure/surface/table/woodentable/fancy,
 /obj/effect/decal/cleanable/dirt,
-/obj/structure/machinery/computer/spy_camera/wy,
+/obj/structure/machinery/computer/spy_camera/wy{
+	pixel_x = -9;
+	pixel_y = 0
+	},
+/obj/structure/machinery/computer/wy_intranet/wy_hc{
+	pixel_x = 8;
+	pixel_y = 0
+	},
 /turf/open/floor/corsat/white/northwest,
 /area/adminlevel/ert_station/fax_response_station)
 "KT" = (

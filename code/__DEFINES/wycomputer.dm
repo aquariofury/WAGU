@@ -15,3 +15,10 @@
 #define WY_COMP_ACCESS_FORBIDDEN 1
 /// Logged out...
 #define WY_COMP_ACCESS_LOGGED_OUT 0
+
+/// Cooldown between Corporate Legal Team requests transmitted from the WY Intranet.
+#define LEGAL_REQUEST_COOLDOWN (5 MINUTES)
+
+#define LEGAL_REQUEST_PENDING "pending"
+#define LEGAL_REQUEST_APPROVED "approved"
+#define LEGAL_REQUEST_DENIED "denied"

@@ -44,9 +44,16 @@
 	var/list/document_categories = list(PAPER_CATEGORY_LIAISON)
 	var/list/documents_available = list()
 
+	/// Whether this console can transmit Corporate Legal Team requests (CL auth still required).
+	var/can_request_legal_team = TRUE
+	/// Whether this console can review and resolve pending Corporate Legal Team requests.
+	var/is_legal_approver = FALSE
+
 	COOLDOWN_DECLARE(printer_cooldown)
 	COOLDOWN_DECLARE(cell_flasher)
 	COOLDOWN_DECLARE(sec_flasher)
+	COOLDOWN_DECLARE(legal_request_cooldown)
+	COOLDOWN_DECLARE(legal_dispatch_cooldown)
 
 /obj/structure/machinery/computer/wy_intranet/Initialize()
 	internal_camera_console = new(src)
@@ -102,6 +109,14 @@
 	internal_camera_network = list(CAMERA_NET_CONTAINMENT, CAMERA_NET_RESEARCH, CAMERA_NET_CONTAINMENT_HIDDEN)
 	internal_camera_restricted = TRUE
 
+/// WY HC fax responder terminal. Used by the WY Communications Executive to
+/// approve/deny incoming Corporate Legal Team requests or dispatch one directly.
+/obj/structure/machinery/computer/wy_intranet/wy_hc
+	name = "WY HC Intranet Terminal"
+	desc = "A Weyland-Yutani HC terminal for triaging incoming requests from corporate assets in the field."
+	is_legal_approver = TRUE
+	can_request_legal_team = FALSE
+
 // ------ WY Intranet Console UI ------ //
 
 /obj/structure/machinery/computer/wy_intranet/attack_hand(mob/user)
@@ -148,7 +163,27 @@
 
 	data["available_documents"] = documents_available
 
+	data["can_request_legal_team"] = can_request_legal_team
+	data["legal_request_cooldown"] = !COOLDOWN_FINISHED(src, legal_request_cooldown)
+	data["is_legal_approver"] = is_legal_approver
+	data["legal_dispatch_cooldown"] = !COOLDOWN_FINISHED(src, legal_dispatch_cooldown)
+	data["pending_legal_requests"] = get_pending_legal_requests_payload()
+
 	return data
+
+/obj/structure/machinery/computer/wy_intranet/proc/get_pending_legal_requests_payload()
+	var/list/payload = list()
+	for(var/datum/legal_team_request/request as anything in GLOB.legal_team_requests)
+		if(request.status != LEGAL_REQUEST_PENDING)
+			continue
+		payload += list(list(
+			"ref" = "\ref[request]",
+			"requester_name" = request.requester_name,
+			"reason" = request.reason,
+			"time" = request.created_at_text,
+			"source" = request.source,
+		))
+	return payload
 
 /obj/structure/machinery/computer/wy_intranet/ui_status(mob/user, datum/ui_state/state)
 	. = ..()
@@ -211,6 +246,11 @@
 		if("page_printer")
 			last_menu = current_menu
 			current_menu = "printer"
+		if("page_legal_requests")
+			if(!is_legal_approver)
+				return FALSE
+			last_menu = current_menu
+			current_menu = "legal_requests"
 
 		if("unlock_divider")
 			toggle_divider()
@@ -266,6 +306,76 @@
 			var/selected_document = params["document_name"]
 			COOLDOWN_START(src, printer_cooldown, 23.4 SECONDS)
 			addtimer(CALLBACK(src, PROC_REF(print_document), selected_document), 3.4 SECONDS)
+
+		if("request_legal_team")
+			if(!can_request_legal_team)
+				return FALSE
+			if(authentication < WY_COMP_ACCESS_LIAISON)
+				to_chat(user, SPAN_WARNING("Only the Corporate Liaison may request legal support."))
+				playsound(src, 'sound/machines/buzz-two.ogg', 15, 1)
+				return FALSE
+			if(!COOLDOWN_FINISHED(src, legal_request_cooldown))
+				to_chat(user, SPAN_WARNING("The Corporate Legal Team relay is still cooling down."))
+				playsound(src, 'sound/machines/buzz-two.ogg', 15, 1)
+				return FALSE
+			playsound = FALSE
+			var/reason_text = tgui_input_text(user, "State the reason for requesting Corporate Legal Team support:", "Legal Team Request", max_length = MAX_MESSAGE_LEN, multiline = TRUE)
+			if(!reason_text)
+				return FALSE
+			if(!COOLDOWN_FINISHED(src, legal_request_cooldown))
+				return FALSE
+			if(authentication < WY_COMP_ACCESS_LIAISON)
+				return FALSE
+			COOLDOWN_START(src, legal_request_cooldown, LEGAL_REQUEST_COOLDOWN)
+			transmit_legal_team_request(user, reason_text, src, "intranet")
+
+		if("approve_legal_request")
+			if(!is_legal_approver)
+				return FALSE
+			if(authentication < WY_COMP_ACCESS_CORPORATE_SENIOR)
+				to_chat(user, SPAN_WARNING("Your access tier does not authorise legal team approvals."))
+				playsound(src, 'sound/machines/buzz-two.ogg', 15, 1)
+				return FALSE
+			var/datum/legal_team_request/request = locate(params["ref"])
+			if(!istype(request) || !(request in GLOB.legal_team_requests) || request.status != LEGAL_REQUEST_PENDING)
+				to_chat(user, SPAN_WARNING("That request is no longer pending."))
+				return FALSE
+			resolve_legal_team_request(user, request, TRUE)
+
+		if("deny_legal_request")
+			if(!is_legal_approver)
+				return FALSE
+			if(authentication < WY_COMP_ACCESS_CORPORATE_SENIOR)
+				to_chat(user, SPAN_WARNING("Your access tier does not authorise legal team approvals."))
+				playsound(src, 'sound/machines/buzz-two.ogg', 15, 1)
+				return FALSE
+			var/datum/legal_team_request/request = locate(params["ref"])
+			if(!istype(request) || !(request in GLOB.legal_team_requests) || request.status != LEGAL_REQUEST_PENDING)
+				to_chat(user, SPAN_WARNING("That request is no longer pending."))
+				return FALSE
+			resolve_legal_team_request(user, request, FALSE)
+
+		if("dispatch_legal_team")
+			if(!is_legal_approver)
+				return FALSE
+			if(authentication < WY_COMP_ACCESS_CORPORATE_SENIOR)
+				to_chat(user, SPAN_WARNING("Your access tier does not authorise legal team dispatch."))
+				playsound(src, 'sound/machines/buzz-two.ogg', 15, 1)
+				return FALSE
+			if(!COOLDOWN_FINISHED(src, legal_dispatch_cooldown))
+				to_chat(user, SPAN_WARNING("The dispatch relay is still cooling down."))
+				playsound(src, 'sound/machines/buzz-two.ogg', 15, 1)
+				return FALSE
+			playsound = FALSE
+			var/reason_text = tgui_input_text(user, "State the dispatch reason:", "Dispatch Legal Team", max_length = MAX_MESSAGE_LEN, multiline = TRUE)
+			if(!reason_text)
+				return FALSE
+			if(!COOLDOWN_FINISHED(src, legal_dispatch_cooldown))
+				return FALSE
+			if(authentication < WY_COMP_ACCESS_CORPORATE_SENIOR)
+				return FALSE
+			COOLDOWN_START(src, legal_dispatch_cooldown, LEGAL_REQUEST_COOLDOWN)
+			dispatch_legal_team_unilaterally(user, reason_text, src)
 
 	if(playsound)
 		playsound(src, "keyboard_alt", 15, 1)

@@ -1890,6 +1890,26 @@
 		log_game("[key_name_admin(usr)] has denied a distress beacon, requested by [key_name_admin(ref_person)]")
 		message_admins("[key_name_admin(usr)] has denied a distress beacon, requested by [key_name_admin(ref_person)]")
 
+	if(href_list["legal_beacon_approve"])
+		var/datum/legal_team_request/request = locate(href_list["legal_beacon_approve"])
+		if(!istype(request) || !(request in GLOB.legal_team_requests))
+			to_chat(usr, SPAN_WARNING("That legal team request no longer exists."))
+			return
+		if(request.status != LEGAL_REQUEST_PENDING)
+			to_chat(usr, SPAN_WARNING("That request has already been [request.status]."))
+			return
+		resolve_legal_team_request(usr, request, TRUE)
+
+	if(href_list["legal_beacon_deny"])
+		var/datum/legal_team_request/request = locate(href_list["legal_beacon_deny"])
+		if(!istype(request) || !(request in GLOB.legal_team_requests))
+			to_chat(usr, SPAN_WARNING("That legal team request no longer exists."))
+			return
+		if(request.status != LEGAL_REQUEST_PENDING)
+			to_chat(usr, SPAN_WARNING("That request has already been [request.status]."))
+			return
+		resolve_legal_team_request(usr, request, FALSE)
+
 	if(href_list["destroyship"]) //Distress Beacon, sends a random distress beacon when pressed
 		GLOB.destroy_cancel = FALSE
 		message_admins("[key_name_admin(usr)] has opted to GRANT the self-destruct! Starting in 10 seconds... (<A href='byond://?_src_=admin_holder;[HrefToken(forceGlobal = TRUE)];sdcancel=\ref[usr]'>CANCEL</A>)")
