@@ -151,7 +151,7 @@
 	item_spawn = /obj/effect/landmark/ert_spawns/distress_pmc/item
 	probability = 0
 	ert_message = "A corporate lawyer beacon has been activated!"
-	time_required_for_job = 0 // DEBUG: was 15 HOURS — restore before merging
+	time_required_for_job = 15 HOURS
 
 /datum/emergency_call/inspection_wy/lawyer/New()
 	..()
